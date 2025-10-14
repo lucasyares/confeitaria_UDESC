@@ -3,12 +3,19 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#define clrscr() printf("\e[1;1H\e[2J")
+
+
 #define PRODUCTS_AMOUNT 3
+
+
 const char *main_product_desc[] = {"Um produto doce, recheado de chocolate com moranfo", "Um produto feito para os amantes de salgadinhos, vindo com um frango bem temperado e uma massa feita pensando justamente em você!", "Agridoce"};
 const char *main_product_name[] = {"Produto A", "Produto B", "Produto C"};
 const int main_product_amount[] = {20, 4, 3};
 const float  main_product_value[] = {19.99,20.50,4.55};
 char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250];
+int id_client;
+
 typedef struct {
     char product_name[200];
     char product_description[250];
@@ -40,7 +47,23 @@ int time_now(){
     printf("Data (Sistema): %02d/%02d/%04d %02d:%02d \n", day, month, year, hour, minute);
     return 0;
 }
+bool empty_value(const char *string_individual_taxpayer_registration){
+    int i;
+    i = 2;
+    {
+        printf("%d\n", string_individual_taxpayer_registration[i]);
+        if(string_individual_taxpayer_registration[i] == 1){ // cpf [10] = True
+            return true;
+        }
+        return false; 
+    }
+    
 
+}
+void order_slip(){
+    // The output 
+       time_now();
+}
 // The function will verify if your cpf is real or fake
 bool validate_itr(const char *string_individual_taxpayer_registration) {
     int i; // Variable to count
@@ -58,7 +81,7 @@ bool validate_itr(const char *string_individual_taxpayer_registration) {
         }
     }
     int size = sizeof(valid_values) / sizeof(valid_values[0]);
-    printf("Number version --> %d\n", sub_plus);
+    //printf("Number version --> %d\n", sub_plus); <- Uncomment to see the sum of your cpf
     if (in_list(sub_plus, valid_values, size)) {
         return true;
     }
@@ -66,7 +89,10 @@ bool validate_itr(const char *string_individual_taxpayer_registration) {
 }
 
 int main() {
+    id_client = 0;
     Product product[PRODUCTS_AMOUNT];
+    clrscr();
+    individual_taxpayer_registration[2] = true;
     int i;
     // Will add the main product to us 
     for(i = 0; i <= 2; i++){
@@ -75,6 +101,9 @@ int main() {
     product[i].product_value = main_product_value[i];
     product[i].product_amount = main_product_amount[i];   
     };
+
+
+
 
     // Will show our products
     printf("Cardápio");
@@ -85,16 +114,30 @@ int main() {
     printf("Descrição: %s\n", product[i].product_description);
     printf("Valor: R$%.2f\n", product[i].product_value);
     printf("Porção: %d\n", product[i].product_amount);};
-    // Alert: If you wrote your name with space, It´s will affect your cpf -- WE NEED TO VALIDATE
     
     
+    
+    
+    // Registering the client in our system
     printf("* Escreva teu nome : ");
-    scanf("%s",client_name);
+    fgets(client_name, sizeof client_name, stdin);
     printf("Escreva teu cpf : ");
-    scanf("%s",individual_taxpayer_registration);
-    // We need to create a while loop that only allows valid CPFs or empty input.
-    if(validate_itr(individual_taxpayer_registration)){ 
-    printf("Your cpf is real");
-    }else{printf("Your cpf is fake");}
+    fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
+    if(empty_value(individual_taxpayer_registration)){
+        printf("Vazio");
+    } else{
+        printf("Com dado");
+    }
+ while (!(validate_itr(individual_taxpayer_registration)) && empty_value(individual_taxpayer_registration) == false)
+    {
+            printf("Seu CPF foi considerado inválido, aperte enter ou tente digitar novamente!");
+            printf("\n Escreva teu cpf : ");
+            fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
+                if(empty_value(individual_taxpayer_registration)){
+        printf("Vazio");
+    } else{
+        printf("Com dado");
+    }
+    }
     return 0;
 }
