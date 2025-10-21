@@ -35,7 +35,7 @@ const int valid_values[] = {
 // Function to verify if our value is inside of some list (It´s like the 'in' in Python)
 bool in_list(int value, const int list[], int size) {for (int i = 0; i < size; i++) {if (value == list[i]){return true;}}return false;}
     
-int time_now(){
+const char* time_now(){
    time_t t = time(NULL); 
     struct tm *currentTime = localtime(&t); 
 
@@ -52,7 +52,8 @@ bool empty_value(const char *string_individual_taxpayer_registration){
     i = 2;
     {
         printf("%d\n", string_individual_taxpayer_registration[i]);
-        if(string_individual_taxpayer_registration[i] == 1){ // cpf [10] = True
+        //If the cpf is empty, the CPF[2] will be true/1
+        if(string_individual_taxpayer_registration[i] == 1){ 
             return true;
         }
         return false; 
@@ -60,13 +61,19 @@ bool empty_value(const char *string_individual_taxpayer_registration){
     
 
 }
-void order_slip(){
-    // The output 
-       time_now();
-}
+// Maybe the best way to storage this data is using a vector.
+void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration){
+    // The output
+       printf("ID:  %04d\n", _id);
+       printf("Nome: %s",_client_name);
+       time_now(); // We need a way to save this information
+       // We need to validate the formatt of our cpf
+       // example: 11111111111 -> 111.111.111-11
+       printf("CPF: %s", individual_taxpayer_registration);
+    }
 // The function will verify if your cpf is real or fake
 bool validate_itr(const char *string_individual_taxpayer_registration) {
-    int i; // Variable to count
+    int i; 
     int sub_plus; // Variable to sum our cpf
     sub_plus = 0;
     i = 0;
@@ -75,7 +82,7 @@ bool validate_itr(const char *string_individual_taxpayer_registration) {
         //printf("---> %c\n", string_individual_taxpayer_registration[i]); 
 
         if(isdigit(string_individual_taxpayer_registration[i])){ // Will verify if our char is a number or not
-            int num = string_individual_taxpayer_registration[i] - '0'; // If it´s a number, will declare a num and will convert the char into a int
+            int num = string_individual_taxpayer_registration[i] - '0'; // If it´s a number, will declare a num and will convert the char into an int
             //printf("Number version --> %d\n", num);
             sub_plus = sub_plus + num; 
         }
@@ -89,7 +96,7 @@ bool validate_itr(const char *string_individual_taxpayer_registration) {
 }
 
 int main() {
-    id_client = 0;
+    id_client = 1;
     Product product[PRODUCTS_AMOUNT];
     clrscr();
     individual_taxpayer_registration[2] = true;
@@ -123,21 +130,12 @@ int main() {
     fgets(client_name, sizeof client_name, stdin);
     printf("Escreva teu cpf : ");
     fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
-    if(empty_value(individual_taxpayer_registration)){
-        printf("Vazio");
-    } else{
-        printf("Com dado");
-    }
  while (!(validate_itr(individual_taxpayer_registration)) && empty_value(individual_taxpayer_registration) == false)
     {
             printf("Seu CPF foi considerado inválido, aperte enter ou tente digitar novamente!");
             printf("\n Escreva teu cpf : ");
             fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
-                if(empty_value(individual_taxpayer_registration)){
-        printf("Vazio");
-    } else{
-        printf("Com dado");
     }
-    }
+    order_slip(id_client, client_name,individual_taxpayer_registration);
     return 0;
 }
