@@ -61,13 +61,13 @@ bool empty_value(const char *string_individual_taxpayer_registration){
     
 
 }
-// Maybe the best way to storage this data is using a vector.
+// Maybe the best way to store this data is using a vector.
 void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration){
     // The output
-       printf("ID:  %04d\n", _id);
+       printf("\nID:  %04d\n", _id);
        printf("Nome: %s",_client_name);
        time_now(); // We need a way to save this information
-       // We need to validate the formatt of our cpf
+       // We need to validate the format of our cpf
        // example: 11111111111 -> 111.111.111-11
        printf("CPF: %s", individual_taxpayer_registration);
     }
@@ -130,7 +130,7 @@ int main() {
     fgets(client_name, sizeof client_name, stdin);
     printf("Escreva teu cpf : ");
     fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
- while (!(validate_itr(individual_taxpayer_registration)) && empty_value(individual_taxpayer_registration) == false)
+ while (strlen(individual_taxpayer_registration) > 1 && !(validate_itr(individual_taxpayer_registration)))
     {
             printf("Seu CPF foi considerado inválido, aperte enter ou tente digitar novamente!");
             printf("\n Escreva teu cpf : ");
