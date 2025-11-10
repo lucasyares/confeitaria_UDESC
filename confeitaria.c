@@ -4,17 +4,14 @@
 #include <ctype.h>
 #include <time.h>
 #define clrscr() printf("\e[1;1H\e[2J")
-
-
 #define PRODUCTS_AMOUNT 3
-
 
 const char *main_product_desc[] = {"Um produto doce, recheado de chocolate com moranfo", "Um produto feito para os amantes de salgadinhos, vindo com um frango bem temperado e uma massa feita pensando justamente em você!", "Agridoce"};
 const char *main_product_name[] = {"Produto A", "Produto B", "Produto C"};
 const int main_product_amount[] = {20, 4, 3};
 const float  main_product_value[] = {19.99,20.50,4.55};
-char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250];
-int id_client;
+char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], payment_method[9], is_delivery[4];
+int id_client, total_value;
 
 typedef struct {
     char product_name[200];
@@ -30,7 +27,7 @@ const int valid_values[] = {
         32, 33, 34, 43, 44, 45,
         54, 55, 56, 65, 66, 67,
         76, 77, 78, 87, 88
-    };
+};
 
 // Function to verify if our value is inside of some list (It´s like the 'in' in Python)
 bool in_list(int value, const int list[], int size) {for (int i = 0; i < size; i++) {if (value == list[i]){return true;}}return false;}
@@ -47,6 +44,7 @@ const char* time_now(){
     printf("Data (Sistema): %02d/%02d/%04d %02d:%02d \n", day, month, year, hour, minute);
     return 0;
 }
+
 bool empty_value(const char *string_individual_taxpayer_registration){
     int i;
     i = 2;
@@ -61,6 +59,7 @@ bool empty_value(const char *string_individual_taxpayer_registration){
     
 
 }
+
 // Maybe the best way to store this data is using a vector.
 void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration){
     // The output
@@ -70,7 +69,8 @@ void order_slip(const int _id, const char *_client_name, const char *individual_
        // We need to validate the format of our cpf
        // example: 11111111111 -> 111.111.111-11
        printf("CPF: %s", individual_taxpayer_registration);
-    }
+}
+
 // The function will verify if your cpf is real or fake
 bool validate_itr(const char *string_individual_taxpayer_registration) {
     int i; 
@@ -100,6 +100,7 @@ int main() {
     Product product[PRODUCTS_AMOUNT];
     clrscr();
     individual_taxpayer_registration[2] = true;
+
     int i;
     // Will add the main product to us 
     for(i = 0; i <= 2; i++){
@@ -108,9 +109,6 @@ int main() {
     product[i].product_value = main_product_value[i];
     product[i].product_amount = main_product_amount[i];   
     };
-
-
-
 
     // Will show our products
     printf("Cardápio");
@@ -122,20 +120,51 @@ int main() {
     printf("Valor: R$%.2f\n", product[i].product_value);
     printf("Porção: %d\n", product[i].product_amount);};
     
-    
-    
-    
     // Registering the client in our system
     printf("* Escreva teu nome : ");
     fgets(client_name, sizeof client_name, stdin);
     printf("Escreva teu cpf : ");
     fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
- while (strlen(individual_taxpayer_registration) > 1 && !(validate_itr(individual_taxpayer_registration)))
+
+    while (strlen(individual_taxpayer_registration) > 1 && !(validate_itr(individual_taxpayer_registration))) 
     {
-            printf("Seu CPF foi considerado inválido, aperte enter ou tente digitar novamente!");
-            printf("\n Escreva teu cpf : ");
-            fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
+        printf("Seu CPF foi considerado inválido, aperte enter ou tente digitar novamente!");
+        printf("\n Escreva teu cpf : ");
+        fgets(individual_taxpayer_registration, sizeof individual_taxpayer_registration, stdin);
     }
+
+    // Payment method, delivery and contact info input
+    printf("------------------------------\n");    
+    printf("1 - Dinheiro\n");
+    printf("2 - Cartão (Padrão)\n");
+    printf("------------------------------\n");    
+    printf("Escolha a forma de pagamento: ");
+    scanf("%d", &i);
+    
+    while (i != 1 && i != 2) {
+        printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
+        scanf("%d", &i);
+    }
+    
+    payment_method = (i == 1) ? "Dinheiro" : "Cartão";
+    
+    printf("------------------------------\n");    
+    printf("1 - Entrega\n");
+    printf("2 - Retirada (Padrão)\n");
+    printf("------------------------------\n");    
+    printf("Escolha entre entrega e retirada: ");
+    scanf("%d", &i);
+    
+    while (i != 1 && i != 2) {
+        printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
+        scanf("%d", &i);
+    }
+    
+    is_delivery = (i == 1) ? "Sim" : "Não";
+    
+    // Order of products
+
+
     order_slip(id_client, client_name,individual_taxpayer_registration);
     return 0;
 }
