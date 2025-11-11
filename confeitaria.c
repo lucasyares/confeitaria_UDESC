@@ -6,12 +6,13 @@
 #define clrscr() printf("\e[1;1H\e[2J")
 #define PRODUCTS_AMOUNT 3
 
-const char *main_product_desc[] = {"Um produto doce, recheado de chocolate com moranfo", "Um produto feito para os amantes de salgadinhos, vindo com um frango bem temperado e uma massa feita pensando justamente em você!", "Agridoce"};
+const char *main_product_desc[] = {"Um produto doce, recheado de chocolate com morango", "Um produto feito para os amantes de salgadinhos, vindo com um frango bem temperado e uma massa feita pensando justamente em você!", "Agridoce"};
 const char *main_product_name[] = {"Produto A", "Produto B", "Produto C"};
 const int main_product_amount[] = {20, 4, 3};
 const float  main_product_value[] = {19.99,20.50,4.55};
-char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], payment_method[9], is_delivery[4];
-int id_client, total_value;
+char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], *payment_method, *is_delivery;
+int id_client, total_value,client_product_switched;
+
 
 typedef struct {
     char product_name[200];
@@ -61,7 +62,7 @@ bool empty_value(const char *string_individual_taxpayer_registration){
 }
 
 // Maybe the best way to store this data is using a vector.
-void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration){
+void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration, int position){
     // The output
        printf("\nID:  %04d\n", _id);
        printf("Nome: %s",_client_name);
@@ -69,6 +70,8 @@ void order_slip(const int _id, const char *_client_name, const char *individual_
        // We need to validate the format of our cpf
        // example: 11111111111 -> 111.111.111-11
        printf("CPF: %s", individual_taxpayer_registration);
+       printf("Produto: %s\n", main_product_name[position-1]);
+       
 }
 
 // The function will verify if your cpf is real or fake
@@ -97,6 +100,7 @@ bool validate_itr(const char *string_individual_taxpayer_registration) {
 
 int main() {
     id_client = 1;
+    client_product_switched = 0;
     Product product[PRODUCTS_AMOUNT];
     clrscr();
     individual_taxpayer_registration[2] = true;
@@ -119,7 +123,9 @@ int main() {
     printf("Descrição: %s\n", product[i].product_description);
     printf("Valor: R$%.2f\n", product[i].product_value);
     printf("Porção: %d\n", product[i].product_amount);};
-    
+    printf("Dígite teu produto: ");
+    scanf("%d", &client_product_switched);
+    getchar();
     // Registering the client in our system
     printf("* Escreva teu nome : ");
     fgets(client_name, sizeof client_name, stdin);
@@ -140,10 +146,10 @@ int main() {
     printf("------------------------------\n");    
     printf("Escolha a forma de pagamento: ");
     scanf("%d", &i);
-    
+    int valid_payment = 0;
     while (i != 1 && i != 2) {
         printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
-        scanf("%d", &i);
+        valid_payment = scanf("%d", &i);
     }
     
     payment_method = (i == 1) ? "Dinheiro" : "Cartão";
@@ -154,17 +160,17 @@ int main() {
     printf("------------------------------\n");    
     printf("Escolha entre entrega e retirada: ");
     scanf("%d", &i);
-    
+    int valid_delivery = 0;
     while (i != 1 && i != 2) {
         printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
-        scanf("%d", &i);
-    }
+        valid_delivery = scanf("%d", &i);
+        }
     
     is_delivery = (i == 1) ? "Sim" : "Não";
     
     // Order of products
 
 
-    order_slip(id_client, client_name,individual_taxpayer_registration);
+    order_slip(id_client, client_name,individual_taxpayer_registration, client_product_switched);
     return 0;
 }
