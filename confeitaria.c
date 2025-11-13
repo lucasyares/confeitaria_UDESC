@@ -10,7 +10,7 @@ const char *main_product_desc[] = {"Um produto doce, recheado de chocolate com m
 const char *main_product_name[] = {"Produto A", "Produto B", "Produto C"};
 const int main_product_amount[] = {20, 4, 3};
 const float  main_product_value[] = {19.99,20.50,4.55};
-char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], *payment_method, *is_delivery;
+char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], paymentInput[10], deliveryInput[10], *payment_method, *is_delivery;
 int id_client, total_value,client_product_switched;
 
 
@@ -145,13 +145,14 @@ int main() {
     printf("2 - Cartão (Padrão)\n");
     printf("------------------------------\n");    
     printf("Escolha a forma de pagamento: ");
-    scanf("%d", &i);
-    int valid_payment = 0;
-    while (i != 1 && i != 2) {
+
+    while (fgets(paymentInput, sizeof(paymentInput), stdin)) {
+        if (sscanf(paymentInput, "%d", &i) == 1 && (i == 1 || i == 2)) {
+            break;
+        }
         printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
-        valid_payment = scanf("%d", &i);
     }
-    
+   
     payment_method = (i == 1) ? "Dinheiro" : "Cartão";
     
     printf("------------------------------\n");    
@@ -159,15 +160,16 @@ int main() {
     printf("2 - Retirada (Padrão)\n");
     printf("------------------------------\n");    
     printf("Escolha entre entrega e retirada: ");
-    scanf("%d", &i);
-    int valid_delivery = 0;
-    while (i != 1 && i != 2) {
-        printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
-        valid_delivery = scanf("%d", &i);
+
+    while (fgets(deliveryInput, sizeof(deliveryInput), stdin)) {
+        if (sscanf(deliveryInput, "%d", &i) == 1 && (i == 1 || i == 2)) {
+            break;
         }
+        printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
+    }
     
     is_delivery = (i == 1) ? "Sim" : "Não";
-    
+
     // Order of products
 
 
