@@ -4,24 +4,35 @@
 #include <ctype.h>
 #include <time.h>
 #define clrscr() printf("\e[1;1H\e[2J")
-#define PRODUCTS_AMOUNT 3
+#define PRODUCTS_AMOUNT 4
 
-const char *main_product_desc[] = {"Um produto doce, recheado de chocolate com morango", "Um produto feito para os amantes de salgadinhos, vindo com um frango bem temperado e uma massa feita pensando justamente em você!", "Agridoce"};
-const char *main_product_name[] = {"Produto A", "Produto B", "Produto C"};
-const int main_product_amount[] = {20, 4, 3};
-const float  main_product_value[] = {19.99,20.50,4.55};
-char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], productInput[10], paymentInput[10], deliveryInput[10], *payment_method, *is_delivery;
-int id_client, total_value,client_product_switched;
+const char *main_product_desc[] = {"Massa de chocolate, recheio à base de chocolate e leite condensado", "Coxinha frita recheada com frango", "Brigadeiro pequeno para festa", "Mini Pizza individual pequena"};
+const char *main_product_name[] = {"Bolo de Chocolate", "Coxinha", "Beijinho", "Mini Pizza"};
+const int main_product_amount[] = {40, 100, 100, 100};
+const float  main_product_value[] = {100.0, 70.0, 90.0, 125.0};
+const int main_product_max_order_amount[] = {5, 5, 5, 5};
+char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], *payment_method, *is_delivery;
+int id_client, client_product_switched;
+float total_value = 0;
 
-void validate_input(char input_variable[], int *i, int ammount);
+bool in_list(int value, const int list[], int size);
+const char* time_now();
+void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration, int position);
+bool validate_itr(const char *string_individual_taxpayer_registration);
+void validate_input(char *input_variable, int *i, int ammount);
 
 typedef struct {
     char product_name[200];
     char product_description[250];
     float product_value;
     int product_amount;
+    int max_order_amount;
+    int order_amount;
    // You can add more information
 } Product;
+
+Product selectedProducts[PRODUCTS_AMOUNT];
+Product selectProduct(Product *productList);
 
 // All possible combinations of digit sums in the CPF(valid)
 const int valid_values[] = {
@@ -35,7 +46,7 @@ const int valid_values[] = {
 bool in_list(int value, const int list[], int size) {for (int i = 0; i < size; i++) {if (value == list[i]){return true;}}return false;}
     
 const char* time_now(){
-   time_t t = time(NULL); 
+    time_t t = time(NULL); 
     struct tm *currentTime = localtime(&t); 
 
     int year = currentTime->tm_year + 1900; 
@@ -64,25 +75,29 @@ bool empty_value(const char *string_individual_taxpayer_registration){
 */
 
 // Maybe the best way to store this data is using a vector.
-void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration, int position){
+void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration, int position) {
+    int i;
     // The output
-       printf("\nNúmero do pedido (ID):  %04d\n", _id);
-       printf("Nome do cliente: %s",_client_name);
-       printf("CPF: %s", individual_taxpayer_registration);
-       time_now(); // We need a way to save this information
-       printf("Forma de pagamento: %s\n", payment_method);
-       printf("Quando paga? \n");
-       printf("Entrega?: %s\n", is_delivery);
-       printf("Valor total: %d\n", total_value);
-       printf("Descrição ( itens do pedido ):\n");
-       printf("------------------------------\n");    
-       printf("%s\n", main_product_name[position-1]);
-       printf("------------------------------\n");    
-       // We need to validate the format of our cpf
-       // example: 11111111111 -> 111.111.111-11
-       printf("Endereço: \n");
-       printf("Contato: \n");
-       
+    printf("-------------------------------------------------------------------------------\n");    
+    printf("Número do pedido (ID):  %04d\n", _id);
+    printf("Nome do cliente: %s",_client_name);
+    printf("CPF: %s", individual_taxpayer_registration);
+    time_now(); // We need a way to save this information
+    printf("Forma de pagamento: %s\n", payment_method);
+    //printf("Quando paga? \n");
+    printf("Entrega?: %s\n", is_delivery);
+    printf("Valor total: R$%.2f\n", total_value);
+    printf("Descrição:\n");
+    printf("-------------------------------------------------------------------------------\n");    
+
+    for (i = 0; i < PRODUCTS_AMOUNT; i++) {
+        printf("\n%s - %s\nQuantidade: %i\nValor: %.2f\n", selectedProducts[i].product_name, selectedProducts[i].product_description, selectedProducts[i].order_amount, selectedProducts[i].product_value);
+    }
+
+    printf("\n-------------------------------------------------------------------------------\n");    
+    printf("Endereço: %s\n", address);
+    printf("Contato: %s", contact_number);
+    printf("-------------------------------------------------------------------------------\n");    
 }
 
 // The function will verify if your cpf is real or fake
@@ -110,22 +125,26 @@ bool validate_itr(const char *string_individual_taxpayer_registration) {
 }
 
 int main() {
+    int i;
+    char deliveryInput[10];
+    char paymentInput[10];
+
     id_client = 1;
     client_product_switched = 0;
-    Product product[PRODUCTS_AMOUNT];
-    clrscr();
+    Product product[PRODUCTS_AMOUNT]; // Products vector
+    //clrscr();
     individual_taxpayer_registration[2] = true;
 
-    int i;
     // Will add the main product to us 
-    for(i = 0; i <= 2; i++){
-    snprintf(product[i].product_name, 200, "%s",main_product_name[i]);
-    snprintf(product[i].product_description, 250,"%s", main_product_desc[i]);
-    product[i].product_value = main_product_value[i];
-    product[i].product_amount = main_product_amount[i];   
+    for(i = 0; i < PRODUCTS_AMOUNT; i++){
+        snprintf(product[i].product_name, 200, "%s",main_product_name[i]);
+        snprintf(product[i].product_description, 250,"%s", main_product_desc[i]);
+        product[i].product_value = main_product_value[i];
+        product[i].product_amount = main_product_amount[i];   
+        product[i].max_order_amount = main_product_max_order_amount[i];
     };
 
-    // Will show our products
+    /* Will show our products
     printf("Cardápio");
     for(i = 0; i <=2; i++){
         printf("------------------------------\n");    
@@ -138,8 +157,20 @@ int main() {
 
     printf("* Digite teu produto: ");
     validate_input(productInput, &client_product_switched, PRODUCTS_AMOUNT);
+    */
+
+    for (i = 0; i < PRODUCTS_AMOUNT; i++) {
+        Product nextProduct = selectProduct(product);
+        snprintf(selectedProducts[i].product_name, 200, "%s", nextProduct.product_name);
+        snprintf(selectedProducts[i].product_description, 250,"%s", nextProduct.product_description);
+        selectedProducts[i].product_value = nextProduct.product_value;
+        selectedProducts[i].product_amount = nextProduct.product_amount;   
+        selectedProducts[i].max_order_amount = nextProduct.product_amount;
+        selectedProducts[i].order_amount = nextProduct.order_amount;
+    }
 
     // Registering the client in our system
+    clrscr();
     printf("* Escreva teu nome : ");
     fgets(client_name, sizeof client_name, stdin);
     printf("Escreva teu cpf : ");
@@ -173,14 +204,56 @@ int main() {
     
     is_delivery = (i == 1) ? "Sim" : "Não";
 
-    // Order of products
+    if (!(strcmp(is_delivery, "Sim"))) {
+        printf("Digite seu endereço: ");
+        fgets(address, sizeof(address), stdin);
+    } else {
+        strcpy(address, "-");
+    } 
 
+    printf("\nDigite um número para contato: ");
+    fgets(contact_number, sizeof(contact_number), stdin);
+
+    // Order of products
+    
+    clrscr();
     order_slip(id_client, client_name,individual_taxpayer_registration, client_product_switched);
     return 0;
 }
 
-void validate_input(char input_variable[], int *i, int amount) {
-    while (fgets(input_variable, sizeof(&input_variable), stdin)) {
+Product selectProduct(Product *productList) {
+    int i;
+    Product selectedProduct;
+    char amountInput[10];
+    char productInput[10];
+
+    clrscr();
+    printf("Cardápio");
+    printf("\n------------------------------\n");    
+    for(i = 0; i < PRODUCTS_AMOUNT; i++){
+        printf("Produto: %d\n", i+1);
+        printf("Nome: %s\n", productList[i].product_name);
+        printf("Descrição: %s\n", productList[i].product_description);
+        printf("Valor: R$%.2f\n", productList[i].product_value);
+        printf("Porção: %d\n", productList[i].product_amount);
+        printf("------------------------------\n");    
+    }
+
+    printf("* Selecione um produto: ");
+    validate_input(productInput, &i, PRODUCTS_AMOUNT);
+    selectedProduct = productList[i - 1]; 
+    printf("Quantidade: ");
+    validate_input(amountInput, &i, selectedProduct.max_order_amount);
+    selectedProduct.order_amount = i;
+
+    total_value += selectedProduct.product_value * i;
+
+    return selectedProduct;
+
+}
+
+void validate_input(char *input_variable, int *i, int amount) {
+    while (fgets(input_variable, sizeof(input_variable), stdin)) {
         if (sscanf(input_variable, "%d", i) == 1 && (*i == 1 || *i <= amount)) {
             break;
         }
@@ -188,3 +261,4 @@ void validate_input(char input_variable[], int *i, int amount) {
     }
 
 }
+
