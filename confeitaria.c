@@ -10,9 +10,10 @@ const char *main_product_desc[] = {"Um produto doce, recheado de chocolate com m
 const char *main_product_name[] = {"Produto A", "Produto B", "Produto C"};
 const int main_product_amount[] = {20, 4, 3};
 const float  main_product_value[] = {19.99,20.50,4.55};
-char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], paymentInput[10], deliveryInput[10], *payment_method, *is_delivery;
+char client_name[250], client_cep[9], individual_taxpayer_registration[15], client_food_restriction[250], address[250], contact_number[11], productInput[10], paymentInput[10], deliveryInput[10], *payment_method, *is_delivery;
 int id_client, total_value,client_product_switched;
 
+void validate_input(char input_variable[], int *i, int ammount);
 
 typedef struct {
     char product_name[200];
@@ -46,6 +47,7 @@ const char* time_now(){
     return 0;
 }
 
+/* 
 bool empty_value(const char *string_individual_taxpayer_registration){
     int i;
     i = 2;
@@ -57,20 +59,29 @@ bool empty_value(const char *string_individual_taxpayer_registration){
         }
         return false; 
     }
-    
 
 }
+*/
 
 // Maybe the best way to store this data is using a vector.
 void order_slip(const int _id, const char *_client_name, const char *individual_taxpayer_registration, int position){
     // The output
-       printf("\nID:  %04d\n", _id);
-       printf("Nome: %s",_client_name);
+       printf("\nNúmero do pedido (ID):  %04d\n", _id);
+       printf("Nome do cliente: %s",_client_name);
+       printf("CPF: %s", individual_taxpayer_registration);
        time_now(); // We need a way to save this information
+       printf("Forma de pagamento: %s\n", payment_method);
+       printf("Quando paga? \n");
+       printf("Entrega?: %s\n", is_delivery);
+       printf("Valor total: %d\n", total_value);
+       printf("Descrição ( itens do pedido ):\n");
+       printf("------------------------------\n");    
+       printf("%s\n", main_product_name[position-1]);
+       printf("------------------------------\n");    
        // We need to validate the format of our cpf
        // example: 11111111111 -> 111.111.111-11
-       printf("CPF: %s", individual_taxpayer_registration);
-       printf("Produto: %s\n", main_product_name[position-1]);
+       printf("Endereço: \n");
+       printf("Contato: \n");
        
 }
 
@@ -117,15 +128,17 @@ int main() {
     // Will show our products
     printf("Cardápio");
     for(i = 0; i <=2; i++){
-    printf("------------------------------\n");    
-    printf("Produto: %d\n", i+1);
-    printf("Nome: %s\n", product[i].product_name);
-    printf("Descrição: %s\n", product[i].product_description);
-    printf("Valor: R$%.2f\n", product[i].product_value);
-    printf("Porção: %d\n", product[i].product_amount);};
-    printf("Dígite teu produto: ");
-    scanf("%d", &client_product_switched);
-    getchar();
+        printf("------------------------------\n");    
+        printf("Produto: %d\n", i+1);
+        printf("Nome: %s\n", product[i].product_name);
+        printf("Descrição: %s\n", product[i].product_description);
+        printf("Valor: R$%.2f\n", product[i].product_value);
+        printf("Porção: %d\n", product[i].product_amount);
+    }
+
+    printf("* Digite teu produto: ");
+    validate_input(productInput, &client_product_switched, PRODUCTS_AMOUNT);
+
     // Registering the client in our system
     printf("* Escreva teu nome : ");
     fgets(client_name, sizeof client_name, stdin);
@@ -142,37 +155,36 @@ int main() {
     // Payment method, delivery and contact info input
     printf("------------------------------\n");    
     printf("1 - Dinheiro\n");
-    printf("2 - Cartão (Padrão)\n");
+    printf("2 - Cartão\n");
     printf("------------------------------\n");    
     printf("Escolha a forma de pagamento: ");
 
-    while (fgets(paymentInput, sizeof(paymentInput), stdin)) {
-        if (sscanf(paymentInput, "%d", &i) == 1 && (i == 1 || i == 2)) {
-            break;
-        }
-        printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
-    }
+    validate_input(paymentInput, &i, 2);
    
     payment_method = (i == 1) ? "Dinheiro" : "Cartão";
     
     printf("------------------------------\n");    
     printf("1 - Entrega\n");
-    printf("2 - Retirada (Padrão)\n");
+    printf("2 - Retirada\n");
     printf("------------------------------\n");    
     printf("Escolha entre entrega e retirada: ");
 
-    while (fgets(deliveryInput, sizeof(deliveryInput), stdin)) {
-        if (sscanf(deliveryInput, "%d", &i) == 1 && (i == 1 || i == 2)) {
-            break;
-        }
-        printf("Entrada inválida. Digite 1 ou 2 para prosseguir: ");
-    }
+    validate_input(deliveryInput, &i, 2);
     
     is_delivery = (i == 1) ? "Sim" : "Não";
 
     // Order of products
 
-
     order_slip(id_client, client_name,individual_taxpayer_registration, client_product_switched);
     return 0;
+}
+
+void validate_input(char input_variable[], int *i, int amount) {
+    while (fgets(input_variable, sizeof(&input_variable), stdin)) {
+        if (sscanf(input_variable, "%d", i) == 1 && (*i == 1 || *i <= amount)) {
+            break;
+        }
+        printf("Entrada inválida. Digite um número de 1 a %d para prosseguir: ", amount);
+    }
+
 }
